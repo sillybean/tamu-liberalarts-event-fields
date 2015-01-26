@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Liberal Arts Events Custom Fields
-Version: 1.1
+Version: 1.2
 Author: Stephanie Leary
 Author URI: http://stephanieleary.com/
 Description: Populates the list of campus buildings for event venues. Provides a shortcode to embed campus maps.
