@@ -1,17 +1,49 @@
 <?php
 /*
 Plugin Name: Liberal Arts Events Custom Fields
-Version: 1.2
+Version: 1.3
 Author: Stephanie Leary
 Author URI: http://stephanieleary.com/
-Description: Populates the list of campus buildings for event venues. Provides a shortcode to embed campus maps.
+Description: Populates the list of campus buildings for event venues. Provides a shortcode to embed campus maps 
+and a filter that prepends an iframe of the map to event pages' content.
 License: GPL2
 */
+
+// Content filter to display map, if a building is selected
+
+add_filter( 'the_content', 'tamu_campus_map_content_filter' );
+
+function tamu_campus_map_content_filter( $content ) {
+	if ( 'tribe_events' !== get_post_type() )
+		return $content;
+	 
+	$bldg = get_post_meta( get_the_ID(), 'campus_building', true );
+	
+	if ( isset( $bldg ) && !empty ( $bldg ) ) {
+
+		// buildings are stored as strings with square brackets containing the ID
+		// ex: 'Blocker Building (BLOC) [524]'
+		$bldg = trim( $bldg );
+		$start = strpos( $bldg, '[' );
+		$bldgID = substr( $bldg, $start );
+		$blogID = rtrim( $bldgID, ']' );
+		
+		$link = 'http://aggiemap.tamu.edu/?bldg=' . $bldgID;
+		$iframe = sprintf( '<div id="aggiemap">
+		<iframe width="640" height="480" src="%s"></iframe>
+		</div>', $link );
+		$content = $iframe . $content;
+	} 
+	
+	return $content;
+}
+
+
 
 // Shortcodes
 
 
-// [building id="1602"] or [building 1602] becomes http://aggiemap.tamu.edu/?bldg=1602
+// [building id="1602"] or [building 1602] becomes a URL: http://aggiemap.tamu.edu/?bldg=1602
 // [bldg 1602] also works
 
 add_shortcode( 'building', 'tamu_campus_map_link_shortcode' );
