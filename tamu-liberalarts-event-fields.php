@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Liberal Arts Events Custom Fields
-Version: 1.3
+Version: 1.3.1
 Author: Stephanie Leary
 Author URI: http://stephanieleary.com/
 Description: Populates the list of campus buildings for event venues. Provides a shortcode to embed campus maps 
@@ -26,7 +26,7 @@ function tamu_campus_map_content_filter( $content ) {
 		$bldg = trim( $bldg );
 		$start = strpos( $bldg, '[' );
 		$bldgID = substr( $bldg, $start );
-		$blogID = rtrim( $bldgID, ']' );
+		$blogID = intval( rtrim( $bldgID, ']' ) );
 		
 		$link = 'http://aggiemap.tamu.edu/?bldg=' . $bldgID;
 		$iframe = sprintf( '<div id="aggiemap">
