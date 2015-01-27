@@ -1,13 +1,14 @@
 <?php
 /*
 Plugin Name: Liberal Arts Events Custom Fields
-Version: 1.3.1
+Version: 1.3.2
 Author: Stephanie Leary
 Author URI: http://stephanieleary.com/
 Description: Populates the list of campus buildings for event venues. Provides a shortcode to embed campus maps 
 and a filter that prepends an iframe of the map to event pages' content.
 License: GPL2
 */
+
 
 // Content filter to display map, if a building is selected
 
@@ -23,21 +24,20 @@ function tamu_campus_map_content_filter( $content ) {
 
 		// buildings are stored as strings with square brackets containing the ID
 		// ex: 'Blocker Building (BLOC) [524]'
-		$bldg = trim( $bldg );
-		$start = strpos( $bldg, '[' );
-		$bldgID = substr( $bldg, $start );
-		$blogID = intval( rtrim( $bldgID, ']' ) );
+		$bldg   = trim  ( $bldg );
+		$start  = strpos( $bldg, '[' );
+		$bldgID = substr( $bldg, $start + 1 );
+		$bldgID = rtrim ( $bldgID, ']' );
+		$bldgID = intval( $bldgID );
 		
-		$link = 'http://aggiemap.tamu.edu/?bldg=' . $bldgID;
 		$iframe = sprintf( '<div id="aggiemap">
-		<iframe width="640" height="480" src="%s"></iframe>
-		</div>', $link );
+			<iframe width="640" height="480" src="http://aggiemap.tamu.edu/?bldg=%d"></iframe>
+			</div>', $bldgID );
 		$content = $iframe . $content;
 	} 
 	
 	return $content;
 }
-
 
 
 // Shortcodes
@@ -52,10 +52,7 @@ add_shortcode( 'bldg', 'tamu_campus_map_link_shortcode' );
 function tamu_campus_map_link_shortcode( $atts, $content = null ) {
     $bldg = $link = '';
 
-	if ( isset( $atts['id'] ) )
-		$bldg = (int)$atts['id'];
-	elseif ( isset( $atts[0] ) )
-		$bldg = (int)$atts[0];
+	$bldg = tamu_campus_building_from_atts( $atts );
 	
 	if ( !empty( $bldg ) )
 		$link = 'http://aggiemap.tamu.edu/?bldg=' . $bldg;
@@ -70,24 +67,24 @@ add_shortcode( 'aggiemap', 'tamu_campus_map_embed_shortcode' );
 function tamu_campus_map_embed_shortcode( $atts, $content = null ) {
     $bldg = $link = $iframe = '';
 
-	if ( isset( $atts['id'] ) )
-		$bldg = (int)$atts['id'];
-	elseif ( isset( $atts[0] ) )
-		$bldg = (int)$atts[0];
+	$bldg = tamu_campus_building_from_atts( $atts );
 	
-	if ( !empty( $bldg ) ) {
-		$link = 'http://aggiemap.tamu.edu/?bldg=' . $bldg;
-		
+	if ( !empty( $bldg ) )
 		$iframe = sprintf( '<div id="aggiemap">
-		<iframe width="640" height="480" src="%s"></iframe>
-		</div>', $link );
-		
-	}
+			<iframe width="640" height="480" src="http://aggiemap.tamu.edu/?bldg=%d"></iframe>
+			</div>', $bldg );
 
 	return $iframe;
 }
 
-
+function tamu_campus_building_from_atts( $atts ) {
+	if ( isset( $atts['id'] ) )
+		$bldg = (int) $atts['id'];
+	elseif ( isset( $atts[0] ) )
+		$bldg = (int) $atts[0];
+	
+	return $bldg;
+}
 
 // jQuery autocomplete for building names/numbers
 add_action('admin_enqueue_scripts', 'tamu_campus_building_scripts');
